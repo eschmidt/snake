@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+
+require 'gosu'
+require_relative '../snake'
+require_relative '../food'
+require_relative '../zorder'
+
+class GameWindow < Gosu::Window
+  def initialize
+    super 640, 480
+    self.caption = "I'm a thnaaaake..."
+    self.update_interval *= (Snake::SIZE / 2)
+
+    @background_image = Gosu::Image.new('media/space.png', tileable: true)
+
+    @snake = Snake.new
+    @food = Food.new
+
+    @score = Gosu::Font.new(20)
+  end
+
+  def update
+    if Gosu.button_down? Gosu::KB_UP
+      @snake.turn_up
+    end
+
+    if Gosu.button_down? Gosu::KB_DOWN
+      @snake.turn_down
+    end
+
+    if Gosu.button_down? Gosu::KB_LEFT
+      @snake.turn_left
+    end
+
+    if Gosu.button_down? Gosu::KB_RIGHT
+      @snake.turn_right
+    end
+
+    @snake.move
+
+    if @snake.eat(@food)
+      @food = Food.new
+    end
+  end
+
+  def draw
+    @background_image.draw(0, 0, 0)
+    @snake.draw
+    @food.draw
+    @score.draw_text("Score: #{@snake.score}", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
+  end
+
+  def button_down(id)
+    case id
+    when Gosu::KB_ESCAPE
+      close
+    when Gosu.char_to_button_id('N')
+      unless @snake.alive
+        @snake = Snake.new
+        @food = Food.new
+      end
+    end
+
+    super
+  end
+end
+
+GameWindow.new.show
